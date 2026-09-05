@@ -1,0 +1,52 @@
+=== INPUTS ===
+sleep t1 :  198559 rows | 23 users | 525 exact dup rows (RETAINED, see decision 3)
+act   t1 :     457 rows | 35 users
+act   t2 :     940 rows | 33 users
+union of activity users: 35  (Stata asserts 35)
+
+=== REPLICATION vs PUBLISHED README ===
+metric          published      got   status
+n_users                23       23   ok
+n_sessions            556      556   ok
+median_steps         8135     8135   ok
+n_high                 12       12   ok
+n_low                  11       11   ok
+mean_high           0.898    0.898   ok
+mean_low             0.93     0.93   ok
+t                   -0.98    -0.98   ok
+p                    0.34     0.34   ok
+d                   -0.41    -0.41   ok
+p_mw                 0.13     0.13   ok
+levene_p             0.42     0.42   ok
+cdc_n_high              5        5   ok
+cdc_n_low               9        9   ok
+cdc_p                0.41     0.41   ok
+cdc_d                0.42     0.42   ok
+
+>>> MIRRORS FAITHFUL — safe to replicate in Stata
+
+Shapiro-Wilk  high p=0.0014  low p=0.0000
+cohort medians: high=0.929 low=0.947 (close, while means differ -> outlier-driven)
+
+=== TARGETS FOR .do SECTION 8 (regress) ===
+M1 b(high_activity)=-0.03269 t=-0.964 p=0.3459 R2=0.0424
+M2 robust(HC1)      p=0.3265  (Stata vce(robust) uses HC1 -> should match)
+M3 b(steps_k)=+0.001538 p=0.7704 R2=0.0041
+M4 R2=0.0698  df_model=3 df_resid=19
+
+=== TARGETS FOR .do SECTION 9 (logit) ===
+good_sleeper: 20 of 23 (87.0%) -> events per predictor is low
+L1 b(steps_k)=+0.06866 OR=1.0711 p=0.7201 pseudoR2=0.0074
+L2 b(high)=-0.69315 p=0.5950
+2x2 table (rows good_sleeper, cols high_activity):
+ high_activity   0   1
+good_sleeper         
+0               1   2
+1              10  10
+Fisher exact p = 1.0000
+
+=== TARGETS FOR .do SECTION 10 (sensitivity) ===
+10a tranche-2 activity             n=23 median= 8304.4 p=0.8600 d=+0.075
+10b pooled both tranches           n=23 median= 8367.1 p=0.8600 d=+0.075
+10c duration-weighted efficiency   p=0.3769
+10d if duplicates WERE dropped     n=23 sessions=556 p=0.3385  (baseline retains them: p=0.3385)
